@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title src="logo.jpg">MasterMindes - الحساب الذهني </title>
+    <title>MasterMindes - الحساب الذهني</title>
     <link rel="icon" href="/الايكونه.png" type="image/png" />
     <style>
         :root {
@@ -19,6 +19,7 @@
             background-color: var(--primary-white);
             color: var(--accent-black);
             line-height: 1.6;
+            overflow-x: hidden; /* منع التمرير الأفقي */
         }
         
         hr {
@@ -45,6 +46,7 @@
             width: 100%;
             top: 0;
             z-index: 1000;
+            will-change: transform; /* تحسين الأداء للهواتف */
         }
         
         .header-container {
@@ -338,7 +340,7 @@
             animation: fadeIn 1s ease-out forwards;
         }
         
-        /* القائمة المنسدلة للهواتف */
+        /* القائمة المنسدلة للهواتف - تم التعديل هنا */
         .menu-toggle {
             display: none;
             background: none;
@@ -346,9 +348,11 @@
             color: var(--accent-black);
             font-size: 1.5rem;
             cursor: pointer;
+            z-index: 1001;
+            padding: 5px;
         }
         
-        /* التجاوب */
+        /* التجاوب - تم التعديل هنا */
         @media (max-width: 992px) {
             .hero-content h1 {
                 font-size: 2.2rem;
@@ -380,12 +384,15 @@
                 right: -100%;
                 width: 80%;
                 max-width: 300px;
+                height: calc(100vh - 70px);
                 background-color: var(--primary-white);
                 box-shadow: -5px 0 15px rgba(0,0,0,0.1);
-                transition: right 0.3s ease;
+                transition: right 0.3s ease-in-out; /* تحسين الانتقال */
                 z-index: 999;
-                padding: 20px;
-                border-radius: 0 0 0 10px;
+                padding: 30px 20px;
+                border-radius: 0;
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch; /* تحسين التمرير على iOS */
             }
             
             nav.active {
@@ -397,8 +404,14 @@
             }
             
             nav ul li {
-                margin: 10px 0;
+                margin: 15px 0;
                 text-align: right;
+            }
+            
+            nav ul li a {
+                font-size: 1.1rem;
+                padding: 8px 0;
+                display: block;
             }
             
             .hero {
@@ -444,6 +457,21 @@
             .footer-logo {
                 font-size: 1.4rem;
             }
+            
+            nav {
+                width: 85%;
+                padding: 20px 15px;
+            }
+        }
+
+        /* تحسينات للأداء على الجوال */
+        .hero {
+            background-attachment: scroll; /* تحسين الأداء على الجوال */
+        }
+        
+        /* منع highlight العناصر عند النقر على الجوال */
+        * {
+            -webkit-tap-highlight-color: transparent;
         }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
@@ -572,6 +600,7 @@
                 const nav = document.getElementById('mainNav');
                 if (nav.classList.contains('active')) {
                     nav.classList.remove('active');
+                    document.body.style.overflow = 'auto'; // إعادة التمرير للصفحة
                 }
             });
         });
@@ -598,23 +627,51 @@
             element.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out';
         });
         
-        // القائمة المنسدلة للهواتف
+        // القائمة المنسدلة للهواتف - تم تحسينها للأداء
         const menuToggle = document.getElementById('menuToggle');
         const mainNav = document.getElementById('mainNav');
+        const body = document.body;
         
-        menuToggle.addEventListener('click', () => {
+        menuToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
             mainNav.classList.toggle('active');
+            
+            // منع تمرير الصفحة عند فتح القائمة
+            if (mainNav.classList.contains('active')) {
+                body.style.overflow = 'hidden';
+            } else {
+                body.style.overflow = 'auto';
+            }
         });
         
         // إغلاق القائمة عند النقر خارجها
         document.addEventListener('click', (e) => {
-            if (!mainNav.contains(e.target) && e.target !== menuToggle) {
+            if (mainNav.classList.contains('active') && 
+                !mainNav.contains(e.target) && 
+                e.target !== menuToggle) {
                 mainNav.classList.remove('active');
+                body.style.overflow = 'auto';
+            }
+        });
+        
+        // إغلاق القائمة عند تغيير حجم النافذة
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768 && mainNav.classList.contains('active')) {
+                mainNav.classList.remove('active');
+                body.style.overflow = 'auto';
             }
         });
         
         window.addEventListener('scroll', fadeInOnScroll);
         window.addEventListener('load', fadeInOnScroll);
+        
+        // تحميل الصور بعد تحميل الصفحة لتحسين الأداء
+        window.addEventListener('load', function() {
+            const images = document.querySelectorAll('img');
+            images.forEach(img => {
+                img.setAttribute('loading', 'lazy');
+            });
+        });
     </script>
 </body>
 </html>
